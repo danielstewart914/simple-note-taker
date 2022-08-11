@@ -25,7 +25,7 @@ notesRouter.post( '/', ( req, res ) => {
         db.push( newNote );
 
         fs.writeFile( './db/db.json', JSON.stringify( db, null, 4 ), error => 
-            error ? console.error( error ) : console.log( 'db.json saved!' ) );
+            error ? console.error( error ) : console.log( '+ Note added.' ) );
 
         const response = {
             status: 'success',
@@ -35,14 +35,27 @@ notesRouter.post( '/', ( req, res ) => {
         res.json( response );
 
     } else {
-        res.status( 400 ).json( 'Missing Title or Text from note' );
+        res.status( 400 ).json( 'Missing note title or text' );
     }
 
 } );
 
 notesRouter.delete( '/:id', ( req, res ) => {
-    // TODO: Add delete code
-    res.status( 501 ).end();
+    
+    const id = req.params.id;
+
+    const index = db.map( element => element.id ).indexOf( id );
+
+    if ( index >= 0 ) {
+        db.splice( index, 1 );
+
+        fs.writeFile( './db/db.json', JSON.stringify( db, null, 4 ), error => 
+            error ? console.error( error ) : console.log( '- Note deleted.' ) );
+
+        res.json( 'Note Deleted Successfully!' );
+    } else {
+        res.status( 400 ).json( 'Note does not exist' );
+    }
 } );
 
 module.exports = notesRouter;
