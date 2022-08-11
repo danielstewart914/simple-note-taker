@@ -10,8 +10,10 @@ const app = express();
 app.use( express.json() );
 app.use( express.urlencoded( { extended: true } ) );
 
+// setup api routes
 app.use( '/api', apiRouter );
 
+// setup static public folder
 app.use( express.static( 'public' ) );
 
 // notes page
@@ -24,6 +26,7 @@ app.get( '*', ( req, res ) => {
     res.sendFile( path.join( __dirname, '/public/index.html' ) );
 } );
 
+// start listening for server requests
 app.listen( PORT, () => {
-    console.log( `App listening at http://localhost:${PORT}` );
+    console.log( `App listening on port ${PORT}` );
 } );
