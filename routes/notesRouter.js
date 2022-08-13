@@ -1,14 +1,15 @@
 const express = require( 'express' );
-const notesRouter = express.Router();
 const fs = require( 'fs' );
 const { v4: uuidv4 } = require( 'uuid' );
+const notesRouter = express.Router();
 const db = require( '../db/db.json' );
 
-
+// GET route
 notesRouter.get( '/', ( req, res ) => {
     res.json( db );
 } );
 
+// POST route
 notesRouter.post( '/', ( req, res ) => {
     // destructure note
     const { title, text }  = req.body;
@@ -28,9 +29,11 @@ notesRouter.post( '/', ( req, res ) => {
 
         // write entire db array to file
         fs.writeFile( './db/db.json', JSON.stringify( db, null, 4 ), error => {
+            // if there is an error writing to file
             if ( error ) {
 
                 console.error( error );
+                // respond with an internal server error code
                 res.status( 500 ).json( 'Could not save note to file' );
 
             } else {
@@ -39,7 +42,9 @@ notesRouter.post( '/', ( req, res ) => {
 
                 // create success response
                 const response = {
-                    status: 'success',
+                    status: 200,
+                    statusText: 'Success. Note has been added',
+                    ok: true,
                     body: newNote
                 };
 
@@ -50,12 +55,13 @@ notesRouter.post( '/', ( req, res ) => {
         } );
 
     } else {
-        // return error
-        res.status( 400 ).json( 'Missing note title or text' );
+        // respond with a bad request error code
+        res.status( 400 ).json( 'Cannot save note! Must have title and text properties' );
     }
 
 } );
 
+// DELETE route
 notesRouter.delete( '/:id', ( req, res ) => {
     
     // get id from request
@@ -64,7 +70,7 @@ notesRouter.delete( '/:id', ( req, res ) => {
     // find index of note with requested id
     const index = db.map( element => element.id ).indexOf( id );
 
-    // if note was found
+    // if note index was found
     if ( index >= 0 ) {
 
         // splice it out of the array
@@ -72,21 +78,32 @@ notesRouter.delete( '/:id', ( req, res ) => {
 
         // write entire db array to file
         fs.writeFile( './db/db.json', JSON.stringify( db, null, 4 ), error => {
+            // if there is an error writing to file
             if ( error ) {
 
                 console.error( error );
+                // respond with an internal server error code
                 res.status( 500 ).json( 'Could not delete note from file' );
 
             } else {
 
                 console.log( '- Note deleted.' );
-                res.status( 200 ).json( 'Note Deleted Successfully!' );
+
+                // create success response
+                const response = {
+                    status: 200,
+                    statusText: 'Success. Note has been deleted',
+                    ok: true
+                };
+
+                res.json( response );
             }
 
         } );
     
     } else {
-        res.status( 400 ).json( 'Note does not exist' );
+        // respond with a bad request error code
+        res.status( 400 ).json( `Note with id: ${ id } does not exist` );
     }
 
 } );
